@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Empty Seat - An Interactive Story</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Audio Elements (Optional: Add your files here) -->
+        <audio id="bgm-music" loop>
+            <source src="audio/bgm.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="sfx-click">
+            <source src="audio/click.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- Main Menu -->
+        <div id="main-menu">
+            <h1 class="game-title">The Empty Seat</h1>
+            <p class="game-subtitle">A story about choices, empathy, and consequences.</p>
+            <button id="start-game-button">Begin Story</button>
+            <p class="credits" style="display:none">Created by </p>
+        </div>
+
+        <!-- Character Sprites -->
+        <img id="char-left" class="character-sprite" src="" alt="Character on the left">
+        <img id="char-right" class="character-sprite" src="" alt="Character on the right">
+
+        <!-- Narration Box -->
+        <div id="narration-box" class="ui-box">
+            <p id="narration-text"></p>
+            <button id="next-button" disabled>Next <span>&#10148;</span></button>
+        </div>
+
+        <!-- Dialogue Box -->
+        <div id="dialogue-box" class="ui-box">
+            <div id="char-name"></div>
+            <p id="dialogue-text"></p>
+            <button id="dialogue-next-button">Next <span>&#10148;</span></button>
+        </div>
+
+        <!-- Outcome Box -->
+        <div id="outcome-screen" class="ui-box">
+            <h2 id="outcome-title">Title</h2>
+            <div class="outcome-divider"></div>
+            <p class="outcome-label">MORAL</p>
+            <p id="outcome-moral">The moral goes here.</p>
+            <p class="outcome-label">ADVICE</p>
+            <p id="outcome-advice">The advice goes here.</p>
+            <div class="button-group">
+                <button id="restart-button">Replay Story <span>&#10227;</span></button>
+                <button id="menu-button">Main Menu <span>&#8962;</span></button>
+            </div>
+        </div>
+
+        <!-- Choices Box -->
+        <div id="choices-box" class="ui-box">
+            <!-- Buttons generated dynamically -->
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
