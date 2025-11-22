@@ -173,18 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Scan Tree for Character Images
         Object.keys(narrativeTree).forEach(nodeId => {
             const node = narrativeTree[nodeId];
-
-            // Check dialogues for characters
             if (node.dialogues) {
                 node.dialogues.forEach(d => {
-                    // Logic matches: images/node{ID}/{char}.png
                     assets.add(`images/node${nodeId}/${d.character}.png`);
                 });
             }
-
-            // Check outcomes (usually shows Alice)
             if (node.type === 'Outcome') {
-                // Based on showOutcome logic, it usually calls showCharacter('alice')
                 assets.add(`images/node${nodeId}/alice.png`);
             }
         });
@@ -193,8 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let loadedCount = 0;
         const total = assetsArray.length;
 
-        // If no assets (testing mode), just hide loader
+        // FAILSAFE: If loading gets stuck, force start after 3 seconds
+        const safetyTimer = setTimeout(() => {
+            if (loadingScreen.style.display !== 'none') {
+                console.warn("Loading timed out. Forcing game start.");
+                loadingText.textContent = "Starting...";
+                hideLoader();
+            }
+        }, 3000); 
+
+        // If no assets found, hide immediately
         if (total === 0) {
+            clearTimeout(safetyTimer);
             hideLoader();
             return;
         }
@@ -203,20 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = new Image();
             img.src = src;
             
-            // Count success OR failure (so game doesn't hang on missing image)
-            img.onload = () => { onAssetHandled(); };
-            img.onerror = () => { console.warn('Missing asset:', src); onAssetHandled(); };
+            const handleLoad = () => {
+                loadedCount++;
+                const percent = Math.floor((loadedCount / total) * 100);
+                loadingText.textContent = `Loading Assets... ${percent}%`;
+
+                if (loadedCount >= total) {
+                    clearTimeout(safetyTimer); // Cancel the failsafe
+                    setTimeout(hideLoader, 500);
+                }
+            };
+
+            img.onload = handleLoad;
+            img.onerror = handleLoad; // Proceed even if image is missing
         });
-
-        function onAssetHandled() {
-            loadedCount++;
-            const percent = Math.floor((loadedCount / total) * 100);
-            loadingText.textContent = `Loading Assets... ${percent}%`;
-
-            if (loadedCount === total) {
-                setTimeout(hideLoader, 500); // Small delay for smooth visual
-            }
-        }
     }
 
     function hideLoader() {
