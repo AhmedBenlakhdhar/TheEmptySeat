@@ -165,63 +165,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ASSET PRELOADING LOGIC ---
     function preloadAssets() {
-        const assets = new Set();
-        
-        // 1. Add Background
-        assets.add('backgrounds/cafeteria.png');
+        // 1. Start the safety timer IMMEDIATELY. 
+        // If anything fails below, this guarantees the game starts in 3 seconds.
+        const safetyTimer = setTimeout(() => {
+            console.warn("Preloader timed out or crashed. Forcing game start.");
+            if (loadingScreen) loadingScreen.style.display = 'none';
+        }, 3000);
 
-        // 2. Scan Tree for Character Images
-        Object.keys(narrativeTree).forEach(nodeId => {
-            const node = narrativeTree[nodeId];
-            if (node.dialogues) {
-                node.dialogues.forEach(d => {
-                    assets.add(`images/node${nodeId}/${d.character}.png`);
+        try {
+            const assets = new Set();
+            
+            // Add Background
+            assets.add('backgrounds/cafeteria.png');
+
+            // Safely Scan Tree
+            if (typeof narrativeTree !== 'undefined') {
+                Object.keys(narrativeTree).forEach(nodeId => {
+                    const node = narrativeTree[nodeId];
+                    // Safety check: ensure dialogues exist before looping
+                    if (node.dialogues && Array.isArray(node.dialogues)) {
+                        node.dialogues.forEach(d => {
+                            if (d.character) {
+                                assets.add(`images/node${nodeId}/${d.character}.png`);
+                            }
+                        });
+                    }
+                    // Outcome check
+                    if (node.type === 'Outcome') {
+                        assets.add(`images/node${nodeId}/alice.png`);
+                    }
                 });
             }
-            if (node.type === 'Outcome') {
-                assets.add(`images/node${nodeId}/alice.png`);
-            }
-        });
 
-        const assetsArray = Array.from(assets);
-        let loadedCount = 0;
-        const total = assetsArray.length;
+            const assetsArray = Array.from(assets);
+            let loadedCount = 0;
+            const total = assetsArray.length;
 
-        // FAILSAFE: If loading gets stuck, force start after 3 seconds
-        const safetyTimer = setTimeout(() => {
-            if (loadingScreen.style.display !== 'none') {
-                console.warn("Loading timed out. Forcing game start.");
-                loadingText.textContent = "Starting...";
+            // If no assets found, stop timer and hide immediately
+            if (total === 0) {
+                clearTimeout(safetyTimer);
                 hideLoader();
+                return;
             }
-        }, 3000); 
 
-        // If no assets found, hide immediately
-        if (total === 0) {
-            clearTimeout(safetyTimer);
-            hideLoader();
-            return;
+            // Load each asset
+            assetsArray.forEach(src => {
+                const img = new Image();
+                
+                const handleLoad = () => {
+                    loadedCount++;
+                    // Update text safely
+                    if (loadingText) {
+                        const percent = Math.floor((loadedCount / total) * 100);
+                        loadingText.textContent = `Loading Assets... ${percent}%`;
+                    }
+
+                    if (loadedCount >= total) {
+                        clearTimeout(safetyTimer); // All good, cancel failsafe
+                        setTimeout(hideLoader, 500);
+                    }
+                };
+
+                img.onload = handleLoad;
+                img.onerror = handleLoad; // Count errors as loaded so we don't get stuck
+                img.src = src;
+            });
+
+        } catch (error) {
+            console.error("Preloader error:", error);
+            // The safetyTimer above will handle the cleanup
         }
-
-        assetsArray.forEach(src => {
-            const img = new Image();
-            img.src = src;
-            
-            const handleLoad = () => {
-                loadedCount++;
-                const percent = Math.floor((loadedCount / total) * 100);
-                loadingText.textContent = `Loading Assets... ${percent}%`;
-
-                if (loadedCount >= total) {
-                    clearTimeout(safetyTimer); // Cancel the failsafe
-                    setTimeout(hideLoader, 500);
-                }
-            };
-
-            img.onload = handleLoad;
-            img.onerror = handleLoad; // Proceed even if image is missing
-        });
     }
+
+    function hideLoader() {
+        if (!loadingScreen) return;
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }
+
 
     function hideLoader() {
         loadingScreen.style.opacity = '0';
