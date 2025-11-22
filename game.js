@@ -163,6 +163,76 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	};
 
+    // --- ASSET PRELOADING LOGIC ---
+    function preloadAssets() {
+        const assets = new Set();
+        
+        // 1. Add Background
+        assets.add('backgrounds/cafeteria.png');
+
+        // 2. Scan Tree for Character Images
+        Object.keys(narrativeTree).forEach(nodeId => {
+            const node = narrativeTree[nodeId];
+
+            // Check dialogues for characters
+            if (node.dialogues) {
+                node.dialogues.forEach(d => {
+                    // Logic matches: images/node{ID}/{char}.png
+                    assets.add(`images/node${nodeId}/${d.character}.png`);
+                });
+            }
+
+            // Check outcomes (usually shows Alice)
+            if (node.type === 'Outcome') {
+                // Based on showOutcome logic, it usually calls showCharacter('alice')
+                assets.add(`images/node${nodeId}/alice.png`);
+            }
+        });
+
+        const assetsArray = Array.from(assets);
+        let loadedCount = 0;
+        const total = assetsArray.length;
+
+        // If no assets (testing mode), just hide loader
+        if (total === 0) {
+            hideLoader();
+            return;
+        }
+
+        assetsArray.forEach(src => {
+            const img = new Image();
+            img.src = src;
+            
+            // Count success OR failure (so game doesn't hang on missing image)
+            img.onload = () => { onAssetHandled(); };
+            img.onerror = () => { console.warn('Missing asset:', src); onAssetHandled(); };
+        });
+
+        function onAssetHandled() {
+            loadedCount++;
+            const percent = Math.floor((loadedCount / total) * 100);
+            loadingText.textContent = `Loading Assets... ${percent}%`;
+
+            if (loadedCount === total) {
+                setTimeout(hideLoader, 500); // Small delay for smooth visual
+            }
+        }
+    }
+
+    function hideLoader() {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }
+
+    // --- GAME STATE ---
+    let gameState = {
+        currentNodeId: null,
+        contentIndex: 0,
+        mode: 'narration' 
+    };
+
     const characterNames = { alice: 'Alice', player: 'You', tom: 'Tom', emma: 'Emma' };
 
     // --- DOM ELEMENTS ---
@@ -215,11 +285,40 @@ document.addEventListener('DOMContentLoaded', () => {
         charRight.classList.remove('active', 'inactive');
     }
 
-    function showCharacter(characterId, position) {
+	function showCharacter(characterId, position) {
         const sprite = position === 'left' ? charLeft : charRight;
-        sprite.src = `images/node${gameState.currentNodeId}/${characterId}.png`;
-        sprite.classList.add('active');
-        sprite.classList.remove('inactive');
+        const imagePath = `images/node${gameState.currentNodeId}/${characterId}.png`;
+
+        // Check if the sprite is already displaying this exact image
+        // (We check .includes because sprite.src is an absolute URL)
+        if (sprite.src.includes(imagePath)) {
+            // It's the same character, just make sure they are visible
+            sprite.classList.add('active');
+            sprite.classList.remove('inactive');
+        } else {
+            // It's a new character! 
+            
+            // 1. Ensure the sprite is hidden immediately so the old character doesn't flash
+            sprite.classList.remove('active');
+
+            // 2. Define what happens when the new image is ready
+            sprite.onload = () => {
+                sprite.classList.add('active');
+                sprite.classList.remove('inactive');
+                sprite.onload = null; // Clean up the listener
+            };
+            
+            // 3. Handle errors (e.g., missing image) so the game doesn't break
+            sprite.onerror = () => {
+                console.warn(`Failed to load sprite: ${imagePath}`);
+                // Show it anyway (as a broken icon) or handle gracefully
+                sprite.classList.add('active'); 
+                sprite.onload = null;
+            };
+
+            // 4. Finally, switch the source. This triggers the load.
+            sprite.src = imagePath;
+        }
     }
 
     function typeWriter(text, element, callback) {
