@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
             type: 'Normal',
             narrations: [
                 { text: "It's lunchtime at Brookfield High, and the cafeteria buzzes with students." },
-                { text: "You notice Alice, sitting alone at a corner table, looking anxious." },
-                { text: "Tom and Emma, known for teasing others, are nearby, laughing among themselves." }
+                { text: "You notice Alice standing awkwardly with her tray, scanning the room for a place to sit." },
+                { text: "Tom and Emma are nearby, watching her with amused smirks." }
             ],
             dialogues: [
                 { character: 'alice', text: "Do you… mind if I sit here?", position: 'left' }
@@ -20,13 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
         '2a': {
             type: 'Normal',
             narrations: [
-                { text: "Alice smiles faintly, relieved by your kindness." },
-                { text: "Emma whispers to Tom, rolling her eyes, clearly annoyed by your support." }
+                { text: "You nod and gesture to the empty seat across from you." },
+                { text: "Alice lets out a breath she was holding and sets her tray down." },
+                { text: "Emma whispers to Tom, rolling her eyes at your gesture." }
             ],
             dialogues: [
-                { character: 'player', text: "Of course, you can join me.", position: 'right' },
-                { character: 'player', text: "Don't worry about them. Sit and relax.", position: 'right' },
-                { character: 'alice', text: "Thanks… that means a lot.", position: 'left' },
+                { character: 'player', text: "Go ahead. Don't worry about them.", position: 'right' },
+                { character: 'alice', text: "Thanks… I really appreciate it.", position: 'left' },
                 { character: 'emma', text: "Why bother helping her? So pathetic.", position: 'right' }
             ],
             choices: [
@@ -37,8 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         '2b': {
             type: 'Normal',
             narrations: [
-                { text: "Alice's cheeks burn; she feels invisible and embarrassed." },
-                { text: "Tom smirks, clearly enjoying the moment." }
+                { text: "You look down at your food, pretending not to hear her." },
+                { text: "Alice stands frozen for a moment, her face flushing with embarrassment." },
+                { text: "Tom smirks, clearly enjoying the rejection." }
             ],
             dialogues: [
                 { character: 'alice', text: "Oh… okay.", position: 'left' },
