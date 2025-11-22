@@ -46,8 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { character: 'emma', text: "Ha! Pathetic.", position: 'right' }
             ],
             choices: [
-                { text: "Approach Alice later to offer support", target: '3c' },
-                { text: "Ignore her completely", target: '3d' }
+                { text: "Feel guilty and approach Alice later", target: '3c' },
+                { text: "Ignore her completely", target: '3d' },
+                { text: "Laugh and join the teasing (Verbal)", target: '3e' },
+                { text: "Knock her tray over (Physical)", target: '3f' }
             ]
         },
         '3a': {
@@ -112,6 +114,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 { text: "Leave her to face it alone", target: '4g' }
             ]
         },
+        '3e': {
+            type: 'Normal',
+            narrations: [
+                { text: "You decide to fit in with the cool crowd, adding your voice to the mockery." }
+            ],
+            dialogues: [
+                { character: 'player', text: "Yeah, seriously. Who sits alone like that?", position: 'right' },
+                { character: 'alice', text: "I...", position: 'left' },
+                { character: 'tom', text: "Nice one! She needed to hear that.", position: 'right' },
+                { character: 'emma', text: "Finally, you have a sense of humor.", position: 'right' }
+            ],
+            next: '4h' // Transitions directly to outcome
+        },
+        '3f': {
+            type: 'Normal',
+            narrations: [
+                { text: "You walk past Alice and deliberately shove her tray, sending food flying everywhere." },
+                { text: "The cafeteria goes silent. Alice stands up, trembling and humiliated." }
+            ],
+            dialogues: [
+                { character: 'player', text: "Oops. My bad.", position: 'right' },
+                { character: 'tom', text: "Classic! Look at her!", position: 'right' },
+                { character: 'alice', text: "...", position: 'left' }
+            ],
+            next: '4i' // Transitions directly to outcome
+        },
         '4a': { 
             type: 'Outcome', 
             title: 'Alice Finds a Friend', 
@@ -160,7 +188,21 @@ document.addEventListener('DOMContentLoaded', () => {
             summary: 'Alice feels utterly alone. Bullying intensifies, and her emotional state worsens significantly.', 
             moral: 'Moral: Absence of help can be as damaging as the cruelty itself.', 
             advice: 'Advice: Your engagement is critical; don’t underestimate the impact of ignoring someone in need.' 
-		}
+        },
+        '4h': { 
+            type: 'Outcome', 
+            title: 'The Accomplice', 
+            summary: 'You gained Tom’s approval, but Alice is now terrified of coming to school. You sacrificed kindness to fit in.', 
+            moral: 'Moral: Words leave invisible scars that last longer than bruises.', 
+            advice: 'Advice: Don’t trade your integrity for cheap popularity.' 
+        },
+        '4i': { 
+            type: 'Outcome', 
+            title: 'The Aggressor', 
+            summary: 'Alice is traumatized and likely won\'t return to this school. You may face suspension. You became exactly what she feared.', 
+            moral: 'Moral: Physical aggression is a cycle of violence that destroys trust and safety.', 
+            advice: 'Advice: Strength is used to protect others, not to humiliate them.' 
+        }
     };
 
     const characterNames = { alice: 'Alice', player: 'You', tom: 'Tom', emma: 'Emma' };
@@ -223,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sprite.classList.add('active');
             sprite.classList.remove('inactive');
         } else {
-            // Hide immediately to avoid flickering old char
             sprite.classList.remove('active');
             
             sprite.onload = () => {
@@ -233,7 +274,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             
             sprite.onerror = () => {
-                // Prevent hanging if image missing
                 console.warn(`Failed to load: ${imagePath}`);
                 sprite.classList.add('active');
                 sprite.onload = null;
@@ -335,8 +375,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeDia();
 
             } else {
-                gameState.mode = 'choice';
-                displayChoices();
+                // Dialogue finished, check for choices or auto-transition
+                if (node.choices) {
+                    gameState.mode = 'choice';
+                    displayChoices();
+                } else if (node.next) {
+                    startGame(node.next);
+                }
             }
         }
     }
