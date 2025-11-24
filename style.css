@@ -256,68 +256,133 @@ body {
 #choices-box button:hover::after { opacity: 1; transform: translateX(0); }
 
 /* --- Outcome Final Screen --- */
+/* --- Outcome Final Screen (Redesigned) --- */
 #outcome-screen {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.9);
     width: 90%;
-    max-width: 650px;
+    max-width: 900px; /* Wider to fit image and text side-by-side */
+    height: 600px;    /* Fixed height for 100% image scaling */
     border: 2px solid var(--name-color);
     border-radius: 12px;
-    padding: 40px;
-    text-align: center;
-    background: rgba(12, 12, 12, 0.95);
+    padding: 0;       /* Remove padding so image touches edge */
+    background: rgba(12, 12, 12, 0.98);
     transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    display: flex;    /* Flex layout for side-by-side */
+    flex-direction: row;
+    overflow: hidden; /* Clips the image corners */
 }
 
 #outcome-screen.visible { transform: translate(-50%, -50%) scale(1); }
 
+/* Left Side: Image */
+.outcome-image-container {
+    flex: 0 0 40%; /* Takes up 40% of the width */
+    position: relative;
+    background-color: #1a1a1a;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#outcome-char-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image covers the area without stretching */
+    object-position: center top; /* Focus on face/upper body */
+	filter: drop-shadow(0px 0px 5px rgba(255, 255, 255));
+}
+
+/* Right Side: Content */
+.outcome-content {
+    flex: 1; /* Takes up remaining space */
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    text-align: left;        /* Align text to left */
+}
+
 #outcome-title {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     color: #fff;
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
     text-transform: uppercase;
     letter-spacing: 2px;
+    text-align: left;
+}
+
+#outcome-summary {
+    font-size: 1.1rem;
+    color: #e0e0e0;
+    font-style: italic;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    text-align: left;
 }
 
 .outcome-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--name-color), transparent);
+    background: linear-gradient(90deg, var(--name-color), transparent); /* Fade out to right */
     margin-bottom: 20px;
     opacity: 0.7;
 }
 
 .outcome-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 3px;
     color: #888;
-    margin-bottom: 8px;
-    margin-top: 20px;
+    margin-bottom: 5px;
+    margin-top: 15px;
     text-transform: uppercase;
     font-weight: 700;
+    text-align: left;
 }
 
 #outcome-moral {
     color: var(--moral-color);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 600;
     margin: 0;
     font-style: italic;
     line-height: 1.4;
+    text-align: left;
 }
 
 #outcome-advice {
     color: #ccc;
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin: 0 0 30px 0;
     line-height: 1.5;
+    text-align: left;
 }
 
-/* Button Group for Outcome */
+/* Button Group Alignment */
 .button-group {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end; /* Align buttons to the right */
     gap: 15px;
+    margin-top: auto; /* Push to bottom if space permits */
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    #outcome-screen {
+        flex-direction: column; /* Stack vertically on phones */
+        height: 85vh;
+        max-width: 95%;
+        overflow-y: auto;
+    }
+    .outcome-image-container {
+        flex: 0 0 30%; /* Image takes top 30% */
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .outcome-content {
+        padding: 20px;
+    }
+    #outcome-title { font-size: 1.8rem; }
+    .button-group { justify-content: center; } /* Center buttons on mobile */
 }
 
 /* --- Buttons (Start / Next / Restart / Menu) --- */
@@ -432,4 +497,12 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+#outcome-summary {
+    font-size: 1.1rem;
+    color: #fff;
+    font-style: italic;
+    margin-bottom: 25px;
+    line-height: 1.6;
 }

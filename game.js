@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { character: 'tom', text: "Nice one! She needed to hear that.", position: 'right' },
                 { character: 'emma', text: "Finally, you have a sense of humor.", position: 'right' }
             ],
-            next: '4h' // Transitions directly to outcome
+            next: '4h'
         },
         '3f': {
             type: 'Normal',
@@ -139,70 +139,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 { character: 'tom', text: "Classic! Look at her!", position: 'right' },
                 { character: 'alice', text: "...", position: 'left' }
             ],
-            next: '4i' // Transitions directly to outcome
+            next: '4i'
         },
         '4a': { 
             type: 'Outcome', 
             title: 'Alice Finds a Friend', 
             summary: 'Your support helps Alice gain confidence. She joins school clubs and slowly overcomes bullying, building lasting friendships.', 
-            moral: 'Moral: Steady support empowers others and changes lives.', 
-            advice: 'Advice: Consistently offer help; small gestures accumulate into meaningful change.' 
+            moral: 'Steady support empowers others and changes lives.', 
+            advice: 'Consistently offer help; small gestures accumulate into meaningful change.' 
         },
         '4b': { 
             type: 'Outcome', 
             title: 'Temporary Comfort', 
             summary: 'Alice feels slightly reassured, but without continued support, she still faces bullying and struggles alone.', 
-            moral: 'Moral: One-time help is good, but sustained care is stronger.', 
-            advice: 'Advice: Follow through; support matters most when continuous.' 
+            moral: 'One-time help is good, but sustained care is stronger.', 
+            advice: 'Follow through; support matters most when continuous.' 
         },
         '4c': { 
             type: 'Outcome', 
             title: 'Delayed Support', 
             summary: 'Alice slowly begins to trust you. Bullying continues, but your encouragement gives her some coping strategies.', 
-            moral: 'Moral: Better late than never, but early support is more effective.', 
-            advice: 'Advice: Even if hesitant, offering help later still has a positive impact.' 
+            moral: 'Better late than never, but early support is more effective.', 
+            advice: 'Even if hesitant, offering help later still has a positive impact.' 
         },
         '4d': { 
             type: 'Outcome', 
             title: 'Neglected', 
             summary: 'Alice feels abandoned and vulnerable. Bullying escalates, causing long-term emotional distress.', 
-            moral: 'Moral: Ignoring problems can worsen suffering.', 
-            advice: 'Advice: Inaction can have serious consequences—your presence matters.' 
+            moral: 'Ignoring problems can worsen suffering.', 
+            advice: 'Inaction can have serious consequences—your presence matters.' 
         },
         '4e': { 
             type: 'Outcome', 
             title: 'Small Encouragement', 
             summary: 'Alice gains minor confidence, but without direct intervention, the bullying continues.', 
-            moral: 'Moral: Encouragement is a start, but sometimes action is needed.', 
-            advice: 'Advice: Support is valuable, but don’t underestimate direct help.' 
+            moral: 'Encouragement is a start, but sometimes action is needed.', 
+            advice: 'Support is valuable, but don’t underestimate direct help.' 
         },
         '4f': { 
             type: 'Outcome', 
             title: 'Late Intervention', 
             summary: 'Your late help assists Alice partially, but the prolonged bullying has caused lasting effects.', 
-            moral: 'Moral: Timing matters; early action prevents deeper harm.', 
-            advice: 'Advice: Intervene promptly to minimize suffering.' 
+            moral: 'Timing matters; early action prevents deeper harm.', 
+            advice: 'Intervene promptly to minimize suffering.' 
         },
         '4g': { 
             type: 'Outcome', 
             title: 'Isolation Deepens', 
             summary: 'Alice feels utterly alone. Bullying intensifies, and her emotional state worsens significantly.', 
-            moral: 'Moral: Absence of help can be as damaging as the cruelty itself.', 
-            advice: 'Advice: Your engagement is critical; don’t underestimate the impact of ignoring someone in need.' 
+            moral: 'Absence of help can be as damaging as the cruelty itself.', 
+            advice: 'Your engagement is critical; don’t underestimate the impact of ignoring someone in need.' 
         },
         '4h': { 
             type: 'Outcome', 
             title: 'The Accomplice', 
             summary: 'You gained Tom’s approval, but Alice is now terrified of coming to school. You sacrificed kindness to fit in.', 
-            moral: 'Moral: Words leave invisible scars that last longer than bruises.', 
-            advice: 'Advice: Don’t trade your integrity for cheap popularity.' 
+            moral: 'Words leave invisible scars that last longer than bruises.', 
+            advice: 'Don’t trade your integrity for cheap popularity.' 
         },
         '4i': { 
             type: 'Outcome', 
             title: 'The Aggressor', 
             summary: 'Alice is traumatized and likely won\'t return to this school. You may face suspension. You became exactly what she feared.', 
-            moral: 'Moral: Physical aggression is a cycle of violence that destroys trust and safety.', 
-            advice: 'Advice: Strength is used to protect others, not to humiliate them.' 
+            moral: 'Physical aggression is a cycle of violence that destroys trust and safety.', 
+            advice: 'Strength is used to protect others, not to humiliate them.' 
         }
     };
 
@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const choicesBox = document.getElementById('choices-box');
     const outcomeScreen = document.getElementById('outcome-screen');
+    const outcomeImg = document.getElementById('outcome-char-img'); // New Element
     const restartButton = document.getElementById('restart-button');
     const menuButton = document.getElementById('menu-button');
 
@@ -236,6 +237,24 @@ document.addEventListener('DOMContentLoaded', () => {
         contentIndex: 0,
         mode: 'narration' 
     };
+
+    // --- AUDIO MANAGER ---
+    const voicePlayer = new Audio();
+    voicePlayer.volume = 1.0; 
+
+    function stopVoice() {
+        voicePlayer.pause();
+        voicePlayer.currentTime = 0;
+    }
+
+    function playVoice(filename) {
+        stopVoice();
+        const path = `audio/voices/${filename}`;
+        voicePlayer.src = path;
+        voicePlayer.play().catch(e => {
+            console.warn(`Voice file missing or play prevented: ${filename}`);
+        });
+    }
 
     // --- FUNCTIONS ---
 
@@ -267,19 +286,16 @@ document.addEventListener('DOMContentLoaded', () => {
             sprite.classList.remove('inactive');
         } else {
             sprite.classList.remove('active');
-            
             sprite.onload = () => {
                 sprite.classList.add('active');
                 sprite.classList.remove('inactive');
                 sprite.onload = null;
             };
-            
             sprite.onerror = () => {
                 console.warn(`Failed to load: ${imagePath}`);
                 sprite.classList.add('active');
                 sprite.onload = null;
             };
-
             sprite.src = imagePath;
         }
     }
@@ -303,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame(nodeId) {
+        stopVoice();
         gameState.currentNodeId = nodeId;
         gameState.contentIndex = 0;
         const node = narrativeTree[nodeId];
@@ -316,10 +333,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (node.type === 'Outcome') {
             gameState.mode = 'outcome_summary';
-            narrationBox.classList.add('visible');
-            hideAllCharacters();
-            showCharacter('alice', 'left'); 
-            typeWriter(node.summary, narrationText);
+            
+            // Hide standard sprites
+            hideAllCharacters(); 
+
+            // Play Outcome Voice
+            playVoice(`${nodeId}_outcome-enhanced-v2.wav`);
+            
+            // Trigger the modal immediately
+            showFinalOutcomeBox();
         } else {
             gameState.mode = (node.narrations && node.narrations.length > 0) ? 'narration' : 'dialogue';
             processNodeContent();
@@ -335,6 +357,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dialogueBox.classList.remove('visible');
 
             if (gameState.contentIndex < node.narrations.length) {
+                playVoice(`${gameState.currentNodeId}_narration_${gameState.contentIndex}-enhanced-v2.wav`);
+
                 typeWriter(node.narrations[gameState.contentIndex].text, narrationText);
                 gameState.contentIndex++;
             } else {
@@ -359,6 +383,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 charName.textContent = characterNames[dia.character];
 
+                playVoice(`${gameState.currentNodeId}_dialogue_${gameState.contentIndex}-enhanced-v2.wav`);
+
                 const newText = dia.text;
                 dialogueText.innerHTML = "";
                 dialogueNextBtn.style.display = 'none';
@@ -376,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeDia();
 
             } else {
-                // Dialogue finished, check for choices or auto-transition
+                stopVoice();
                 if (node.choices) {
                     gameState.mode = 'choice';
                     displayChoices();
@@ -392,12 +418,16 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAllUI();
         hideAllCharacters(); 
         
+        // Play the single "choices" audio for this node
+        playVoice(`${gameState.currentNodeId}_choices-enhanced-v2.wav`);
+
         choicesBox.innerHTML = "";
-        node.choices.forEach(choice => {
+        node.choices.forEach((choice, index) => {
             const btn = document.createElement('button');
             btn.textContent = choice.text;
             btn.onclick = () => {
                 playSound(sfxClick);
+                stopVoice(); // Stop reading choices when one is picked
                 startGame(choice.target);
             };
             choicesBox.appendChild(btn);
@@ -408,10 +438,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function showFinalOutcomeBox() {
         const node = narrativeTree[gameState.currentNodeId];
         hideAllUI();
-        hideAllCharacters(); 
+        
+        // Populate the image inside the modal
+        // Note: Outcome images are named alice.png inside their respective node folder
+        const imagePath = `images/node${gameState.currentNodeId}/alice.png`;
+        outcomeImg.src = imagePath;
+
         document.getElementById('outcome-title').textContent = node.title;
+        document.getElementById('outcome-summary').textContent = node.summary;
         document.getElementById('outcome-moral').textContent = node.moral;
         document.getElementById('outcome-advice').textContent = node.advice;
+        
         outcomeScreen.classList.add('visible');
     }
 
@@ -429,11 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextButton.addEventListener('click', () => {
         playSound(sfxClick);
+        stopVoice();
         if (gameState.mode === 'outcome_summary') {
             showFinalOutcomeBox();
         } else if (gameState.mode === 'narration') {
             const node = narrativeTree[gameState.currentNodeId];
             if (gameState.contentIndex < node.narrations.length) {
+                playVoice(`${gameState.currentNodeId}_narration_${gameState.contentIndex}-enhanced-v2.wav`);
+                
                 typeWriter(node.narrations[gameState.contentIndex].text, narrationText);
                 gameState.contentIndex++;
             } else {
@@ -446,18 +486,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dialogueNextBtn.addEventListener('click', () => {
         playSound(sfxClick);
+        stopVoice();
         gameState.contentIndex++;
         processNodeContent();
     });
 
     restartButton.addEventListener('click', () => {
         playSound(sfxClick);
+        stopVoice();
         outcomeScreen.classList.remove('visible');
         startGame('1');
     });
 
     menuButton.addEventListener('click', () => {
         playSound(sfxClick);
+        stopVoice();
         outcomeScreen.classList.remove('visible');
         mainMenu.classList.remove('hidden');
         hideAllUI();
